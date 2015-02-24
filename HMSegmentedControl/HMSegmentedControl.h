@@ -226,4 +226,6 @@ typedef enum {
 - (void)setIndexChangeBlock:(IndexChangeBlock)indexChangeBlock;
 - (void)setTitleFormatter:(HMTitleFormatterBlock)titleFormatter;
 
+- (CGRect)rectAtIndex:(NSInteger)index;
+
 @end

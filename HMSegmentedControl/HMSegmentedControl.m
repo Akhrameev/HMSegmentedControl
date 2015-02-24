@@ -721,35 +721,49 @@
     }
 }
 
-- (void)scrollToSelectedSegmentIndex:(BOOL)animated {
-    CGRect rectForSelectedIndex;
-    CGFloat selectedSegmentOffset = 0;
-    if (self.segmentWidthStyle == HMSegmentedControlSegmentWidthStyleFixed) {
-        rectForSelectedIndex = CGRectMake(self.segmentWidth * self.selectedSegmentIndex,
-                                          0,
-                                          self.segmentWidth,
-                                          self.frame.size.height);
-        
-        selectedSegmentOffset = (CGRectGetWidth(self.frame) / 2) - (self.segmentWidth / 2);
-    } else if (self.segmentWidthStyle == HMSegmentedControlSegmentWidthStyleDynamic) {
-        NSInteger i = 0;
-        CGFloat offsetter = 0;
-        for (NSNumber *width in self.segmentWidthsArray) {
-            if (self.selectedSegmentIndex == i)
-                break;
-            offsetter = offsetter + [width floatValue];
-            i++;
-        }
-        
-        rectForSelectedIndex = CGRectMake(offsetter,
-                                          0,
-                                          [[self.segmentWidthsArray objectAtIndex:self.selectedSegmentIndex] floatValue],
-                                          self.frame.size.height);
-        
-        selectedSegmentOffset = (CGRectGetWidth(self.frame) / 2) - ([[self.segmentWidthsArray objectAtIndex:self.selectedSegmentIndex] floatValue] / 2);
+- (CGRect)rectAtIndex:(NSInteger)index
+{
+  return [self rectAtIndex:index andSegmentOffset:NULL];
+}
+
+- (CGRect)rectAtIndex:(NSInteger)index andSegmentOffset:(CGFloat *)segmentOffsetPointer
+{
+  CGRect rectForSelectedIndex;
+  CGFloat segmentOffset = 0;
+  if (self.segmentWidthStyle == HMSegmentedControlSegmentWidthStyleFixed) {
+    rectForSelectedIndex = CGRectMake(self.segmentWidth * index,
+                                      0,
+                                      self.segmentWidth,
+                                      self.frame.size.height);
+    
+    segmentOffset = (CGRectGetWidth(self.frame) / 2) - (self.segmentWidth / 2);
+  } else if (self.segmentWidthStyle == HMSegmentedControlSegmentWidthStyleDynamic) {
+    NSInteger i = 0;
+    CGFloat offsetter = 0;
+    for (NSNumber *width in self.segmentWidthsArray) {
+      if (index == i)
+        break;
+      offsetter = offsetter + [width floatValue];
+      i++;
     }
     
+    rectForSelectedIndex = CGRectMake(offsetter,
+                                      0,
+                                      [[self.segmentWidthsArray objectAtIndex:index] floatValue],
+                                      self.frame.size.height);
     
+    segmentOffset = (CGRectGetWidth(self.frame) / 2) - ([[self.segmentWidthsArray objectAtIndex:index] floatValue] / 2);
+  }
+  if (segmentOffsetPointer)
+  {
+    *segmentOffsetPointer = segmentOffset;
+  }
+  return rectForSelectedIndex;
+}
+
+- (void)scrollToSelectedSegmentIndex:(BOOL)animated {
+    CGFloat selectedSegmentOffset = 0;
+    CGRect rectForSelectedIndex = [self rectAtIndex:self.selectedSegmentIndex andSegmentOffset:&selectedSegmentOffset];
     CGRect rectToScrollTo = rectForSelectedIndex;
     rectToScrollTo.origin.x -= selectedSegmentOffset;
     rectToScrollTo.size.width += selectedSegmentOffset * 2;
