@@ -51,6 +51,8 @@ typedef enum {
 
 @interface HMSegmentedControl : UIControl
 
+@property (nonatomic, assign) BOOL notifyAboutATapOnSelectedSegment;
+
 @property (nonatomic, strong) NSArray *sectionTitles;
 @property (nonatomic, strong) NSArray *sectionImages;
 @property (nonatomic, strong) NSArray *sectionSelectedImages;
