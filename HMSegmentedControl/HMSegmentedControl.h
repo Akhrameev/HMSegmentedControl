@@ -227,6 +227,8 @@ typedef enum {
 - (void)setSelectedSegmentIndex:(NSUInteger)index animated:(BOOL)animated;
 - (void)setIndexChangeBlock:(IndexChangeBlock)indexChangeBlock;
 - (void)setTitleFormatter:(HMTitleFormatterBlock)titleFormatter;
+- (CGSize)measureTitleAtIndex:(NSUInteger)index;
+- (void)updateSegmentsRects;
 
 - (CGRect)rectAtIndex:(NSInteger)index;
 

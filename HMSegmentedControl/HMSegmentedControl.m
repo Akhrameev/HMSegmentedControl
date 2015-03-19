@@ -178,6 +178,7 @@
     _sectionTitles = sectionTitles;
     
     [self setNeedsLayout];
+    [self setNeedsDisplay];
 }
 
 - (void)setSectionImages:(NSArray *)sectionImages {
@@ -612,11 +613,23 @@
         }];
     } else if (self.type == HMSegmentedControlTypeText && self.segmentWidthStyle == HMSegmentedControlSegmentWidthStyleDynamic) {
         NSMutableArray *mutableSegmentWidths = [NSMutableArray array];
-        
+      
+        __block CGFloat sum = 0.f;
+        __block CGFloat max = 0.f;
         [self.sectionTitles enumerateObjectsUsingBlock:^(id titleString, NSUInteger idx, BOOL *stop) {
             CGFloat stringWidth = [self measureTitleAtIndex:idx].width + self.segmentEdgeInset.left + self.segmentEdgeInset.right;
             [mutableSegmentWidths addObject:[NSNumber numberWithFloat:stringWidth]];
+            sum += stringWidth;
+            max = MAX(max, stringWidth);
         }];
+      
+        if (sum < self.bounds.size.width) {
+          CGFloat factor = self.bounds.size.width / sum;
+          for (NSUInteger i = 0; i < mutableSegmentWidths.count; ++i) {
+            mutableSegmentWidths[i] = @(floorf([mutableSegmentWidths[i] floatValue] * factor));
+          }
+        }
+      
         self.segmentWidthsArray = [mutableSegmentWidths copy];
     } else if (self.type == HMSegmentedControlTypeImages) {
         for (UIImage *sectionImage in self.sectionImages) {
