@@ -22,6 +22,9 @@
 @property (nonatomic, readwrite) NSArray *segmentWidthsArray;
 @property (nonatomic, strong) HMScrollView *scrollView;
 
+@property (nonatomic, strong) CAShapeLayer *selectedSegmentLayer;
+@property (nonatomic, assign) CGPoint tapPoint;
+
 @end
 
 @implementation HMScrollView
@@ -124,6 +127,7 @@
 }
 
 - (void)commonInit {
+    self.tapPoint = CGPointZero;
     self.scrollView = [[HMScrollView alloc] init];
     self.scrollView.scrollsToTop = NO;
     self.scrollView.showsVerticalScrollIndicator = NO;
@@ -312,6 +316,49 @@
             titleLayer.contentsScale = [[UIScreen mainScreen] scale];
             
             [self.scrollView.layer addSublayer:titleLayer];
+          
+            if (idx == self.selectedSegmentIndex)
+            {
+              if (!self.selectedSegmentLayer)
+              {
+                CAShapeLayer *shapeLayer = [[CAShapeLayer alloc] init];
+                shapeLayer.shadowColor = self.selectionIndicatorColor.CGColor;
+                shapeLayer.masksToBounds = YES;
+                self.selectedSegmentLayer = shapeLayer;
+              }
+              if (!CGPointEqualToPoint(self.tapPoint, CGPointZero))
+              {
+                self.selectedSegmentLayer.frame = CGRectMake(rect.origin.x, 0.f, rect.size.width, self.scrollView.layer.frame.size.height);
+                [self.scrollView.layer addSublayer:self.selectedSegmentLayer];
+                
+                self.selectedSegmentLayer.actions = nil;
+                CGRect startRect = CGRectMake(self.tapPoint.x - rect.origin.x, self.tapPoint.y, 0.f, 0.f);
+                CGFloat radius = MAX(rect.size.width, rect.size.height);
+                CGRect finishRect = CGRectMake(self.tapPoint.x - rect.origin.x - radius, self.tapPoint.y - radius, 2.f * radius, 2.f * radius);
+                
+                CABasicAnimation *shadowPathAnimation = [CABasicAnimation animationWithKeyPath:@"shadowPath"];
+                shadowPathAnimation.duration = 0.5;
+                shadowPathAnimation.fromValue = (__bridge id)[UIBezierPath bezierPathWithOvalInRect:startRect].CGPath;
+                shadowPathAnimation.toValue = (id)[UIBezierPath bezierPathWithOvalInRect:finishRect].CGPath;
+                [shadowPathAnimation setTimingFunction:[CAMediaTimingFunction functionWithName: kCAMediaTimingFunctionEaseIn]];
+                shadowPathAnimation.removedOnCompletion = YES;
+                
+                CABasicAnimation *shadowOpacityAnimation = [CABasicAnimation animationWithKeyPath:@"shadowOpacity"];
+                shadowOpacityAnimation.duration = shadowPathAnimation.duration;
+                shadowOpacityAnimation.fromValue = [NSNumber numberWithFloat:0.8];
+                shadowOpacityAnimation.toValue = [NSNumber numberWithFloat:0.1];
+                [shadowOpacityAnimation setTimingFunction:[CAMediaTimingFunction functionWithName: kCAMediaTimingFunctionEaseIn]];
+                shadowOpacityAnimation.removedOnCompletion = YES;
+                
+                [CATransaction begin];
+                [CATransaction setCompletionBlock:^{
+                  self.tapPoint = CGPointZero;
+                }];
+                [self.selectedSegmentLayer addAnimation:shadowPathAnimation forKey:@"shadowPath"];
+                [self.selectedSegmentLayer addAnimation:shadowOpacityAnimation forKey:@"shadowOpacity"];
+                [CATransaction commit];
+              }
+            }
             
             // Vertical Divider
             if (self.isVerticalDividerEnabled && idx > 0) {
@@ -718,7 +765,10 @@
         if (segment < sectionsCount && (self.notifyAboutATapOnSelectedSegment || (segment != self.selectedSegmentIndex))) {
             // Check if we have to do anything with the touch event
             if (self.isTouchEnabled)
+            {
+                self.tapPoint = touchLocation;
                 [self setSelectedSegmentIndex:segment animated:self.shouldAnimateUserSelection notify:YES];
+            }
         }
     }
 }
