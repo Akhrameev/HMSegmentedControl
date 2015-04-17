@@ -328,13 +328,28 @@
               }
               if (!CGPointEqualToPoint(self.tapPoint, CGPointZero))
               {
-                self.selectedSegmentLayer.frame = CGRectMake(rect.origin.x, 0.f, rect.size.width, self.scrollView.layer.frame.size.height);
+                CGFloat segmentWidth = 0.f;
+                switch (self.segmentWidthStyle)
+                {
+                  case HMSegmentedControlSegmentWidthStyleDynamic:
+                    segmentWidth = rect.size.width;
+                    break;
+                    
+                  case  HMSegmentedControlSegmentWidthStyleFixed:
+                    segmentWidth = self.segmentWidth;
+                    
+                  default:
+                    break;
+                }
+                
+                CGFloat offsetX = rect.origin.x - (segmentWidth - rect.size.width) / 2.f;
+                self.selectedSegmentLayer.frame = CGRectMake(offsetX, 0.f, segmentWidth, self.scrollView.layer.frame.size.height);
                 [self.scrollView.layer addSublayer:self.selectedSegmentLayer];
                 
                 self.selectedSegmentLayer.actions = nil;
-                CGRect startRect = CGRectMake(self.tapPoint.x - rect.origin.x, self.tapPoint.y, 0.f, 0.f);
+                CGRect startRect = CGRectMake(self.tapPoint.x - offsetX, self.tapPoint.y, 0.f, 0.f);
                 CGFloat radius = MAX(rect.size.width, rect.size.height);
-                CGRect finishRect = CGRectMake(self.tapPoint.x - rect.origin.x - radius, self.tapPoint.y - radius, 2.f * radius, 2.f * radius);
+                CGRect finishRect = CGRectMake(self.tapPoint.x - offsetX - radius, self.tapPoint.y - radius, 2.f * radius, 2.f * radius);
                 
                 CABasicAnimation *shadowPathAnimation = [CABasicAnimation animationWithKeyPath:@"shadowPath"];
                 shadowPathAnimation.duration = 0.5;
