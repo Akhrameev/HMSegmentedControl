@@ -348,7 +348,7 @@
                 
                 self.selectedSegmentLayer.actions = nil;
                 CGRect startRect = CGRectMake(self.tapPoint.x - offsetX, self.tapPoint.y, 0.f, 0.f);
-                CGFloat radius = MAX(rect.size.width, rect.size.height);
+                CGFloat radius = MAX(segmentWidth, rect.size.height);
                 CGRect finishRect = CGRectMake(self.tapPoint.x - offsetX - radius, self.tapPoint.y - radius, 2.f * radius, 2.f * radius);
                 
                 CABasicAnimation *shadowPathAnimation = [CABasicAnimation animationWithKeyPath:@"shadowPath"];
