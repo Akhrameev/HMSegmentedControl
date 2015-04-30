@@ -686,9 +686,24 @@
         }];
       
         if (sum < self.bounds.size.width) {
-          CGFloat factor = self.bounds.size.width / sum;
+          
+          CGFloat freeSpace = self.bounds.size.width;
+          CGFloat numberOfElements = mutableSegmentWidths.count;
+          CGFloat spaceForOneElement = self.bounds.size.width / mutableSegmentWidths.count;
           for (NSUInteger i = 0; i < mutableSegmentWidths.count; ++i) {
-            mutableSegmentWidths[i] = @(floorf([mutableSegmentWidths[i] floatValue] * factor));
+            if ([mutableSegmentWidths[i] floatValue] > spaceForOneElement) {
+              freeSpace -= [mutableSegmentWidths[i] floatValue];
+              --numberOfElements;
+            }
+          }
+          
+          if (numberOfElements > 0) {
+            spaceForOneElement = freeSpace / numberOfElements;
+            for (NSUInteger i = 0; i < mutableSegmentWidths.count; ++i) {
+              if ([mutableSegmentWidths[i] floatValue] < spaceForOneElement) {
+                mutableSegmentWidths[i] = @(floorf(spaceForOneElement));
+              }
+            }
           }
         }
       
