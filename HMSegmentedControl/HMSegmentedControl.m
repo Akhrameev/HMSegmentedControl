@@ -955,7 +955,6 @@
 
 - (NSDictionary *)resultingTitleTextAttributes {
     NSDictionary *defaults = @{
-        NSFontAttributeName : [UIFont fontWithName:@"STHeitiSC-Light" size:18.0f],
         NSForegroundColorAttributeName : [UIColor blackColor],
     };
     
