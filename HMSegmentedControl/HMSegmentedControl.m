@@ -699,10 +699,21 @@
           
           if (numberOfElements > 0) {
             spaceForOneElement = freeSpace / numberOfElements;
+            float sum = 0.f;
             for (NSUInteger i = 0; i < mutableSegmentWidths.count; ++i) {
               if ([mutableSegmentWidths[i] floatValue] < spaceForOneElement) {
                 mutableSegmentWidths[i] = @(floorf(spaceForOneElement));
               }
+              if (i < mutableSegmentWidths.count - 1)
+              {
+                sum += [mutableSegmentWidths[i] floatValue];
+              }
+            }
+            if (mutableSegmentWidths.count > 0)
+            {
+              int lastIdx = (int)mutableSegmentWidths.count - 1;
+              mutableSegmentWidths[lastIdx] = @(MAX(self.bounds.size.width - sum,
+                                                    [mutableSegmentWidths[lastIdx] floatValue]));
             }
           }
         }
